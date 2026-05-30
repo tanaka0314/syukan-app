@@ -18,8 +18,6 @@ export interface Habit {
   color: HabitColor
   /** 実施する曜日。毎日なら全曜日。 */
   days: Weekday[]
-  /** リマインド時刻 "HH:MM"。未設定なら null。 */
-  reminder: string | null
   /** 作成日時 (ISO) */
   createdAt: string
   /** 残っている「まあいっか（フリーズ）」回数 */

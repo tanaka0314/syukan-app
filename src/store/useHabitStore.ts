@@ -15,7 +15,6 @@ export interface NewHabitInput {
   emoji: string
   color: HabitColor
   days: Weekday[]
-  reminder: string | null
 }
 
 interface HabitState {
@@ -63,7 +62,6 @@ export const useHabitStore = create<HabitState>()(
           emoji: input.emoji || "⭐",
           color: input.color,
           days: input.days.length ? input.days : [0, 1, 2, 3, 4, 5, 6],
-          reminder: input.reminder,
           createdAt: new Date().toISOString(),
           freezeTokens: DEFAULT_FREEZE,
           archived: false,

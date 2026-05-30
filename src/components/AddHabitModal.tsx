@@ -15,7 +15,7 @@ interface Props {
 
 const ALL_DAYS: Weekday[] = [0, 1, 2, 3, 4, 5, 6]
 const WEEKDAYS: Weekday[]  = [1, 2, 3, 4, 5]
-const EMPTY: NewHabitInput = { title: "", tinyStep: "", cue: "", emoji: "⭐", color: "brand", days: [...ALL_DAYS], reminder: null }
+const EMPTY: NewHabitInput = { title: "", tinyStep: "", cue: "", emoji: "⭐", color: "brand", days: [...ALL_DAYS] }
 
 export default function AddHabitModal({ open, editing, onClose }: Props) {
   const addHabit    = useHabitStore((s) => s.addHabit)
@@ -28,7 +28,7 @@ export default function AddHabitModal({ open, editing, onClose }: Props) {
     if (!open) return
     setShowEmoji(false)
     setForm(editing
-      ? { title: editing.title, tinyStep: editing.tinyStep, cue: editing.cue, emoji: editing.emoji, color: editing.color, days: [...editing.days], reminder: editing.reminder }
+      ? { title: editing.title, tinyStep: editing.tinyStep, cue: editing.cue, emoji: editing.emoji, color: editing.color, days: [...editing.days] }
       : { ...EMPTY, days: [...ALL_DAYS] })
   }, [open, editing])
 
@@ -200,23 +200,6 @@ export default function AddHabitModal({ open, editing, onClose }: Props) {
                   </button>
                 )
               })}
-            </div>
-          </div>
-
-          {/* リマインド */}
-          <div>
-            <Label>⏰ リマインド時刻（任意）</Label>
-            <div className="flex items-center gap-2">
-              <input type="time" value={form.reminder ?? ""}
-                onChange={(e) => set("reminder", e.target.value || null)}
-                className="h-11 rounded-yt px-3 text-[15px] outline-none"
-                style={{ background: "#F2F2F2", border: "1px solid rgba(0,0,0,0.10)", color: "#0F0F0F" }}
-              />
-              {form.reminder && (
-                <button onClick={() => set("reminder", null)} className="text-[13px]" style={{ color: "#FF0000" }}>
-                  クリア
-                </button>
-              )}
             </div>
           </div>
 

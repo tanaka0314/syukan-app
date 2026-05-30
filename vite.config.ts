@@ -33,8 +33,6 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,svg,woff2}"],
-        // OneSignal の SW は vite-plugin-pwa のキャッシュ対象から除外
-        globIgnores: ["OneSignalSDKWorker.js"],
       },
     }),
   ],
