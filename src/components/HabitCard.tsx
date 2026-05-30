@@ -9,7 +9,7 @@ interface Props {
   habit: Habit
   onDone: (habitId: string, x: number, y: number) => void
   onEdit: (habit: Habit) => void
-  onFreeze: () => void   // まあいっか成功時のコールバック（トースト表示用）
+  onFreeze: () => void
   onMoveUp?: () => void
   onMoveDown?: () => void
   isFirst: boolean
@@ -30,8 +30,8 @@ export default function HabitCard({
   const isFreeze = todayLog?.kind === "freeze"
 
   const [showFreezeInfo, setShowFreezeInfo] = useState(false)
-  const [editingNote, setEditingNote] = useState(false)
-  const [noteText, setNoteText] = useState("")
+  const [editingNote, setEditingNote]       = useState(false)
+  const [noteText, setNoteText]             = useState("")
 
   const streak = useMemo(
     () => calcStreak(doneSetFor(logs, habit.id), habit.days),
@@ -68,172 +68,235 @@ export default function HabitCard({
   }
 
   return (
-    <div className="bg-yt-bg" style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
+    <div
+      className="relative bg-bmw-canvas animate-pop-in"
+      style={{ borderBottom: "1px solid #e6e6e6" }}
+    >
+      {/* BMW: habit accent — 3px left border strip (decorative only) */}
+      <div
+        className="absolute left-0 top-0 bottom-0 w-[3px]"
+        style={{ background: col.accent }}
+      />
 
-      {/* ── thumbnail ── */}
-      <div className="relative flex h-[148px] w-full items-center justify-center" style={{ background: col.thumb }}>
-        <span className="text-[64px] select-none">{habit.emoji}</span>
+      {/* ── photo plate (model-card-photo style) ── */}
+      <div
+        className="relative flex h-[140px] w-full items-center justify-center"
+        style={{ background: "#fafafa" }} // BMW surface-card
+      >
+        <span className="text-[60px] select-none">{habit.emoji}</span>
 
+        {/* streak badge — top-left */}
         {streak > 0 && (
           <div
-            className="absolute left-2 top-2 flex items-center gap-1 rounded-yt px-2 py-0.5 text-[12px] font-medium text-white"
-            style={{ background: "rgba(0,0,0,0.70)" }}
+            className="absolute left-3 top-3 flex items-center gap-1 px-2 py-0.5"
+            style={{ background: "#1a2129", color: "#bbbbbb" }}
           >
-            <Flame size={12} />{streak}日連続
+            <Flame size={11} />
+            <span className="text-[11px] font-bold" style={{ letterSpacing: "0.5px" }}>
+              {streak}日
+            </span>
           </div>
         )}
 
+        {/* done indicator — top-right */}
         {isDone && (
           <div
-            className="absolute right-2 top-2 flex items-center gap-1 rounded-yt px-2 py-0.5 text-[12px] font-medium text-white"
-            style={{ background: isFreeze ? "rgba(80,80,80,0.80)" : "rgba(255,0,0,0.85)" }}
+            className="absolute right-3 top-3 flex items-center gap-1 px-2 py-0.5"
+            style={{
+              background: isFreeze ? "#e6e6e6" : "#1c69d4",
+              color: isFreeze ? "#6b6b6b" : "#ffffff",
+            }}
           >
-            <Check size={12} />{isFreeze ? "まあいっか" : "達成ずみ"}
+            <Check size={11} />
+            <span className="text-[11px] font-bold" style={{ letterSpacing: "0.5px" }}>
+              {isFreeze ? "SKIP" : "DONE"}
+            </span>
           </div>
         )}
 
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/10">
-          {isDone && (
-            <div
-              className="h-full transition-all duration-500"
-              style={{ width: "100%", background: isFreeze ? "#888" : "#FF0000" }}
-            />
-          )}
-        </div>
+        {/* BMW: no shadow. Depth from color contrast only. */}
+        {/* Progress bar at bottom */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-[3px]"
+          style={{ background: isDone ? (isFreeze ? "#cccccc" : "#1c69d4") : "#e6e6e6" }}
+        />
       </div>
 
-      {/* ── metadata ── */}
-      <div className="flex items-start gap-3 px-3 pt-3 pb-1">
-        <div
-          className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[18px]"
-          style={{ background: col.thumb }}
-        >
-          {habit.emoji}
-        </div>
-        <div className="flex-1 min-w-0">
+      {/* ── card body (model-card style) ── */}
+      <div className="pl-5 pr-4 pt-3 pb-2">
+
+        {/* title: BMW Type Next / 700 → Inter 700 */}
+        <div className="flex items-start justify-between gap-2">
           <h3
-            className="text-[15px] font-medium leading-snug"
-            style={{ color: isDone ? "#606060" : "#0F0F0F", textDecoration: isDone ? "line-through" : "none" }}
+            className="text-[18px] leading-snug"
+            style={{
+              fontWeight: 700,
+              color: isDone ? "#9a9a9a" : "#262626",
+              textDecoration: isDone ? "line-through" : "none",
+            }}
           >
             {habit.title}
           </h3>
-          {habit.cue && (
-            <p className="mt-0.5 text-[13px]" style={{ color: "#606060" }}>🪝 {habit.cue}</p>
-          )}
-          {habit.tinyStep && (
-            <p className="mt-0.5 text-[13px]" style={{ color: "#606060" }}>👣 {habit.tinyStep}</p>
-          )}
-          <p className="mt-1 text-[12px]" style={{ color: "#606060" }}>
-            {streak > 0 ? `🔥 ${streak}日連続達成中` : "まだ連続なし"}
-            {" · "}{isDone ? (isFreeze ? "まあいっかを使用" : "本日達成！") : "未達成"}
-          </p>
+          <button
+            onClick={() => onEdit(habit)}
+            aria-label="編集"
+            className="mt-0.5 shrink-0 p-1 transition active:opacity-60"
+            style={{ color: "#9a9a9a" }}
+          >
+            <MoreVertical size={16} />
+          </button>
         </div>
-        <button
-          onClick={() => onEdit(habit)}
-          aria-label="編集"
-          className="mt-0.5 rounded-full p-1.5 transition active:bg-yt-surface"
-          style={{ color: "#606060" }}
+
+        {/* sub-copy: Light 300 */}
+        {habit.cue && (
+          <p className="mt-0.5 text-[14px]" style={{ fontWeight: 300, color: "#6b6b6b" }}>
+            🪝 {habit.cue}
+          </p>
+        )}
+        {habit.tinyStep && (
+          <p className="mt-0.5 text-[14px]" style={{ fontWeight: 300, color: "#6b6b6b" }}>
+            👣 {habit.tinyStep}
+          </p>
+        )}
+
+        {/* meta: UPPERCASE label */}
+        <p
+          className="mt-1.5 text-[11px]"
+          style={{ fontWeight: 700, letterSpacing: "1.5px", textTransform: "uppercase", color: "#9a9a9a" }}
         >
-          <MoreVertical size={18} />
-        </button>
+          {streak > 0 ? `${streak}日連続` : "連続なし"}
+          {" · "}
+          {isDone ? (isFreeze ? "スキップ使用" : "本日達成") : "未達成"}
+        </p>
       </div>
 
-      {/* ── action bar ── */}
-      <div className="flex items-center gap-0 px-3 pb-2 pt-1">
-        {/* 達成 */}
+      {/* ── action row ── */}
+      <div className="flex items-stretch gap-0 pl-5 pr-4 pb-3">
+
+        {/* 達成 — BMW primary button (rectangular, BMW Blue) */}
         <button
           onClick={handleToggle}
-          className="flex items-center gap-1.5 rounded-yt-pill px-3.5 py-1.5 text-[13px] font-medium transition active:scale-95"
+          className="flex items-center gap-2 px-5 py-2.5 transition active:opacity-80"
           style={{
-            background: isDone && !isFreeze ? "#FF0000" : "#F2F2F2",
-            color: isDone && !isFreeze ? "#fff" : "#0F0F0F",
+            background: isDone && !isFreeze ? "#1c69d4" : "#ffffff",
+            color:       isDone && !isFreeze ? "#ffffff" : "#262626",
+            border:      isDone && !isFreeze ? "none" : "1px solid #cccccc",
+            fontWeight: 700,
+            fontSize: "13px",
+            letterSpacing: "0.5px",
           }}
           aria-label={isDone ? "達成を取り消す" : "達成にする"}
         >
-          <Check size={14} strokeWidth={isDone ? 3 : 2} className={isDone && !isFreeze ? "animate-check-pop" : ""} />
-          {isDone && !isFreeze ? "達成ずみ！" : "達成する"}
+          <Check size={13} strokeWidth={2.5} className={isDone && !isFreeze ? "animate-check-pop" : ""} />
+          {isDone && !isFreeze ? "DONE" : "達成する"}
         </button>
 
         <div className="w-2" />
 
-        {/* まあいっか */}
+        {/* まあいっか — BMW secondary button */}
         {!isDone && (
-          <div className="relative flex items-center">
+          <>
             <button
               onClick={handleFreeze}
               disabled={habit.freezeTokens <= 0}
-              className="flex items-center gap-1.5 rounded-yt-pill px-3.5 py-1.5 text-[13px] font-medium transition active:scale-95 disabled:opacity-40"
-              style={{ background: "#F2F2F2", color: "#0F0F0F" }}
+              className="flex items-center gap-1.5 px-4 py-2.5 transition active:opacity-70 disabled:opacity-30"
+              style={{
+                background: "transparent",
+                color: "#6b6b6b",
+                border: "1px solid #e6e6e6",
+                fontWeight: 700,
+                fontSize: "13px",
+                letterSpacing: "0.5px",
+              }}
             >
-              <Snowflake size={14} />まあいっか
+              <Snowflake size={12} />
+              SKIP
             </button>
             <button
               onClick={() => setShowFreezeInfo((v) => !v)}
-              className="ml-1 p-1"
-              style={{ color: "#606060" }}
+              className="ml-1 px-1.5 py-2.5 transition active:opacity-60"
+              style={{ color: "#9a9a9a" }}
               aria-label="まあいっかとは？"
             >
-              <Info size={14} />
+              <Info size={13} />
             </button>
-          </div>
+          </>
         )}
 
         <div className="flex-1" />
 
         {/* 残トークン */}
         {!isDone && (
-          <span className="mr-2 text-[12px]" style={{ color: "#606060" }}>残{habit.freezeTokens}回</span>
+          <span
+            className="self-center mr-1 text-[11px]"
+            style={{ fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "#9a9a9a" }}
+          >
+            {habit.freezeTokens}/3
+          </span>
         )}
 
-        {/* ↑↓ 並び替えボタン */}
+        {/* ↑↓ */}
         <button
           onClick={onMoveUp}
           disabled={isFirst || !onMoveUp}
+          className="self-center p-0.5 transition active:scale-90 disabled:opacity-20"
+          style={{ color: "#9a9a9a" }}
           aria-label="上に移動"
-          className="rounded p-0.5 transition active:scale-90 disabled:opacity-20"
-          style={{ color: "#606060" }}
         >
-          <ChevronUp size={18} />
+          <ChevronUp size={16} />
         </button>
         <button
           onClick={onMoveDown}
           disabled={isLast || !onMoveDown}
+          className="self-center p-0.5 transition active:scale-90 disabled:opacity-20"
+          style={{ color: "#9a9a9a" }}
           aria-label="下に移動"
-          className="rounded p-0.5 transition active:scale-90 disabled:opacity-20"
-          style={{ color: "#606060" }}
         >
-          <ChevronDown size={18} />
+          <ChevronDown size={16} />
         </button>
       </div>
 
-      {/* ── まあいっか説明 ── */}
+      {/* まあいっか説明 */}
       {showFreezeInfo && (
-        <div className="mx-3 mb-3 rounded-yt p-3 text-[13px] leading-relaxed" style={{ background: "#F2F2F2", color: "#606060" }}>
-          <p className="font-medium" style={{ color: "#0F0F0F" }}>❄️ まあいっかとは？</p>
-          <p className="mt-1">「どうしても無理だった日」に使えるサボり免罪符です。押すと<strong>連続記録が途切れません</strong>。</p>
-          <p className="mt-1">完璧じゃなくていい。続けることのほうが大切です。</p>
-          <p className="mt-1">現在 <strong>{habit.freezeTokens}回分</strong>残っています（毎月3回に補充されます）。</p>
+        <div
+          className="mx-5 mb-3 p-3"
+          style={{ background: "#f7f7f7", borderLeft: "3px solid #1c69d4" }}
+        >
+          <p className="text-[13px]" style={{ fontWeight: 700, letterSpacing: "0.5px", color: "#262626" }}>
+            SKIP とは？
+          </p>
+          <p className="mt-1 text-[13px]" style={{ fontWeight: 300, color: "#3c3c3c", lineHeight: 1.55 }}>
+            どうしても無理な日に使える機能です。連続記録を途切れさせません。
+            完璧を目指さない — それが継続のコツです。
+            残 <strong style={{ fontWeight: 700 }}>{habit.freezeTokens}回</strong>（毎月3回補充）。
+          </p>
         </div>
       )}
 
-      {/* ── ひとこと記録（達成時のみ、freezeは除く） ── */}
+      {/* ひとこと記録（達成時のみ） */}
       {isDone && !isFreeze && (
-        <div className="mx-3 mb-3">
+        <div className="px-5 pb-3">
           {editingNote ? (
             <div className="flex gap-2">
               <input
                 autoFocus
                 value={noteText}
                 onChange={(e) => setNoteText(e.target.value.slice(0, 100))}
-                placeholder="今日の一言（100字まで）"
-                className="flex-1 rounded-yt px-3 py-1.5 text-[13px] outline-none"
-                style={{ background: "#F2F2F2", border: "1px solid rgba(0,0,0,0.10)", color: "#0F0F0F" }}
+                placeholder="今日のひとこと（100字まで）"
+                className="flex-1 px-3 py-2 text-[13px] outline-none"
+                style={{
+                  border: "1px solid #e6e6e6",
+                  borderBottom: "2px solid #1c69d4",
+                  fontWeight: 300,
+                  color: "#262626",
+                  background: "#ffffff",
+                }}
                 onKeyDown={(e) => e.key === "Enter" && handleSaveNote()}
               />
               <button
                 onClick={handleSaveNote}
-                className="rounded-yt px-3 py-1.5 text-[13px] font-medium text-white"
-                style={{ background: "#FF0000" }}
+                className="px-4 py-2 text-[12px] text-white transition active:opacity-80"
+                style={{ background: "#1c69d4", fontWeight: 700, letterSpacing: "0.5px" }}
               >
                 保存
               </button>
@@ -241,18 +304,18 @@ export default function HabitCard({
           ) : todayLog?.note ? (
             <button
               onClick={startEditNote}
-              className="w-full rounded-yt px-3 py-2 text-left text-[13px] transition active:bg-yt-surface"
-              style={{ background: "#F2F2F2", color: "#606060" }}
+              className="w-full text-left text-[13px] transition active:opacity-70"
+              style={{ fontWeight: 300, color: "#6b6b6b" }}
             >
-              💬 {todayLog.note}
+              {todayLog.note}
             </button>
           ) : (
             <button
               onClick={startEditNote}
               className="text-[12px] transition active:opacity-60"
-              style={{ color: "#606060" }}
+              style={{ fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "#9a9a9a" }}
             >
-              💬 ひとこと残す（任意）
+              + ひとこと残す
             </button>
           )}
         </div>

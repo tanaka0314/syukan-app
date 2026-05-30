@@ -1,5 +1,5 @@
 import { useRef } from "react"
-import { Download, Upload, Trash2, ChevronRight, Info } from "lucide-react"
+import { Download, Upload, Trash2, ChevronRight } from "lucide-react"
 import { useHabitStore } from "../store/useHabitStore"
 
 export default function SettingsView() {
@@ -18,13 +18,11 @@ export default function SettingsView() {
       [JSON.stringify({ habits, logs, xp, exportedAt: new Date() }, null, 2)],
       { type: "application/json" },
     )
-    const url = URL.createObjectURL(blob)
     const a = Object.assign(document.createElement("a"), {
-      href: url,
+      href: URL.createObjectURL(blob),
       download: `syukan-backup-${new Date().toISOString().slice(0, 10)}.json`,
     })
     a.click()
-    URL.revokeObjectURL(url)
   }
 
   function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
@@ -37,7 +35,7 @@ export default function SettingsView() {
         if (!Array.isArray(parsed.habits)) throw new Error()
         if (confirm("現在のデータを上書きして読み込みます。")) {
           importState({ habits: parsed.habits, logs: parsed.logs ?? [], xp: parsed.xp ?? 0 })
-          alert("読み込みました！")
+          alert("読み込みました。")
         }
       } catch { alert("ファイルを読み込めませんでした。") }
     }
@@ -46,38 +44,40 @@ export default function SettingsView() {
   }
 
   return (
-    <div className="mx-auto max-w-md pb-28" style={{ background: "#FFFFFF" }}>
+    <div className="mx-auto max-w-md pb-28 bg-bmw-canvas">
 
-      <header className="sticky top-0 z-20 px-4 py-3" style={{ background: "#FFFFFF", borderBottom: "1px solid rgba(0,0,0,0.10)" }}>
-        <h1 className="text-[18px] font-medium" style={{ color: "#0F0F0F" }}>設定</h1>
+      <header
+        className="sticky top-0 z-20 flex h-16 items-center px-5"
+        style={{ background: "#ffffff", borderBottom: "1px solid #e6e6e6" }}
+      >
+        <h1 className="text-[18px]" style={{ fontWeight: 700, color: "#262626" }}>設定</h1>
       </header>
 
-      {/* about */}
-      <div className="mx-4 mt-4 rounded-yt-card p-4" style={{ background: "#F2F2F2" }}>
-        <p className="flex items-center gap-1.5 text-[14px] font-medium" style={{ color: "#0F0F0F" }}>
-          <Info size={15} style={{ color: "#FF0000" }} /> つづくん について
+      {/* BMW dark hero band: about */}
+      <div className="px-6 py-8" style={{ background: "#1a2129" }}>
+        <p
+          className="mb-1 text-[11px]"
+          style={{ fontWeight: 700, letterSpacing: "1.5px", textTransform: "uppercase", color: "#6b6b6b" }}
+        >
+          About
         </p>
-        <p className="mt-2 text-[13px] leading-relaxed" style={{ color: "#606060" }}>
-          「がんばり」ではなく「仕組み」で習慣を続けるために作られたアプリです。
-          <strong style={{ color: "#0F0F0F" }}>極小ステップ</strong>（2分ルール）・
-          <strong style={{ color: "#0F0F0F" }}>きっかけ設定</strong>（if-then）・
-          <strong style={{ color: "#0F0F0F" }}>連続記録</strong>・
-          <strong style={{ color: "#0F0F0F" }}>まあいっか機能</strong>（フリーズ）を搭載。
+        <p className="text-[28px]" style={{ fontWeight: 700, color: "#ffffff" }}>つづくん</p>
+        <p className="mt-3 text-[14px] leading-relaxed" style={{ fontWeight: 300, color: "#bbbbbb" }}>
+          「がんばり」ではなく「仕組み」で習慣を続けるために設計されたアプリです。
+          極小ステップ・if-then・連続記録・まあいっか機能——
           すべて行動科学の知見に基づいています。
         </p>
-        <p className="mt-2 text-[12px]" style={{ color: "#606060" }}>
-          📱 データはこの端末のブラウザ内にのみ保存されます。
+        <p className="mt-3 text-[12px]" style={{ fontWeight: 300, color: "#6b6b6b" }}>
+          データはこの端末のみに保存されます。
         </p>
       </div>
 
       <Section title="データ管理">
-        <Row icon={<Download size={18} style={{ color: "#606060" }} />}
-          title="バックアップを書き出す"
-          desc="JSONファイルとして保存。機種変更時などに使えます"
+        <Row icon={<Download size={16} style={{ color: "#1c69d4" }} />}
+          title="バックアップを書き出す" desc="JSONファイルとして保存します"
           onClick={handleExport} />
-        <Row icon={<Upload size={18} style={{ color: "#606060" }} />}
-          title="バックアップから読み込む"
-          desc="以前のバックアップを復元します"
+        <Row icon={<Upload size={16} style={{ color: "#1c69d4" }} />}
+          title="バックアップから読み込む" desc="以前のバックアップを復元します"
           onClick={() => fileRef.current?.click()} />
         <input ref={fileRef} type="file" accept="application/json" className="hidden" onChange={handleImport} />
       </Section>
@@ -85,13 +85,13 @@ export default function SettingsView() {
       {archived.length > 0 && (
         <Section title="お休み中の習慣">
           {archived.map((h) => (
-            <div key={h.id} className="flex items-center gap-3 px-4 py-3"
-              style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
-              <span className="text-[20px]">{h.emoji}</span>
-              <span className="flex-1 truncate text-[15px]" style={{ color: "#0F0F0F" }}>{h.title}</span>
+            <div key={h.id} className="flex items-center gap-3 px-5 py-4"
+              style={{ borderBottom: "1px solid #e6e6e6" }}>
+              <span className="text-xl">{h.emoji}</span>
+              <span className="flex-1 truncate text-[15px]" style={{ fontWeight: 700, color: "#262626" }}>{h.title}</span>
               <button onClick={() => archiveHabit(h.id)}
-                className="rounded-yt-pill px-3 py-1 text-[13px] font-medium text-white transition active:scale-95"
-                style={{ background: "#FF0000" }}>
+                className="px-4 py-1.5 text-[12px] text-white transition active:opacity-80"
+                style={{ background: "#1c69d4", fontWeight: 700, letterSpacing: "0.5px" }}>
                 再開する
               </button>
             </div>
@@ -99,10 +99,9 @@ export default function SettingsView() {
         </Section>
       )}
 
-      <Section title="危険な操作">
-        <Row icon={<Trash2 size={18} style={{ color: "#FF0000" }} />}
-          title="すべてリセット"
-          desc="習慣と記録をすべて削除します。この操作は取り消せません"
+      <Section title="その他">
+        <Row icon={<Trash2 size={16} style={{ color: "#dc2626" }} />}
+          title="すべてリセット" desc="習慣と記録をすべて削除します（取り消し不可）"
           danger onClick={() => { if (confirm("すべてのデータを削除します。本当によろしいですか？")) resetAll() }} />
       </Section>
 
@@ -112,9 +111,14 @@ export default function SettingsView() {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="mt-5">
-      <p className="px-4 pb-1.5 text-[12px] font-medium uppercase" style={{ color: "#606060" }}>{title}</p>
-      <div style={{ borderTop: "1px solid rgba(0,0,0,0.08)", borderBottom: "1px solid rgba(0,0,0,0.08)", background: "#FFFFFF" }}>
+    <div className="mt-6">
+      <p
+        className="px-5 pb-2 text-[11px]"
+        style={{ fontWeight: 700, letterSpacing: "1.5px", textTransform: "uppercase", color: "#6b6b6b" }}
+      >
+        {title}
+      </p>
+      <div style={{ borderTop: "1px solid #e6e6e6", borderBottom: "1px solid #e6e6e6" }}>
         {children}
       </div>
     </div>
@@ -126,14 +130,14 @@ function Row({ icon, title, desc, onClick, danger }: {
 }) {
   return (
     <button onClick={onClick}
-      className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition active:bg-yt-surface"
-      style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+      className="flex w-full items-center gap-4 px-5 py-4 text-left transition active:bg-bmw-soft"
+      style={{ borderBottom: "1px solid #e6e6e6" }}>
       <span className="shrink-0">{icon}</span>
       <span className="flex-1">
-        <span className="block text-[15px]" style={{ color: danger ? "#FF0000" : "#0F0F0F" }}>{title}</span>
-        <span className="block text-[12px]" style={{ color: "#606060" }}>{desc}</span>
+        <span className="block text-[15px]" style={{ fontWeight: 700, color: danger ? "#dc2626" : "#262626" }}>{title}</span>
+        <span className="block text-[13px]" style={{ fontWeight: 300, color: "#6b6b6b" }}>{desc}</span>
       </span>
-      <ChevronRight size={16} style={{ color: "#C7C7CC" }} />
+      <ChevronRight size={16} style={{ color: "#cccccc" }} />
     </button>
   )
 }

@@ -1,5 +1,5 @@
 import { useMemo } from "react"
-import { Flame, Trophy, TrendingUp, Info } from "lucide-react"
+import { Flame, Trophy, TrendingUp } from "lucide-react"
 import { useHabitStore, doneSetFor, isCompletedOn } from "../store/useHabitStore"
 import { calcStreak, lastNDays, isScheduledOn, todayKey, fromKey } from "../lib/date"
 import { getLevelInfo } from "../lib/level"
@@ -11,6 +11,7 @@ export default function StatsView() {
   const xp     = useHabitStore((s) => s.xp)
   const active = habits.filter((h) => !h.archived)
   const level  = getLevelInfo(xp)
+  const nextLevel = getLevelInfo(level.ceil)
 
   const summary = useMemo(() => {
     let bestStreak = 0, totalDone = 0
@@ -35,82 +36,94 @@ export default function StatsView() {
   }, [active, logs])
 
   return (
-    <div className="mx-auto max-w-md pb-28" style={{ background: "#FFFFFF" }}>
+    <div className="mx-auto max-w-md pb-28 bg-bmw-canvas">
 
-      {/* header */}
+      {/* white header */}
       <header
-        className="sticky top-0 z-20 px-4 py-3"
-        style={{ background: "#FFFFFF", borderBottom: "1px solid rgba(0,0,0,0.10)" }}
+        className="sticky top-0 z-20 flex h-16 items-center px-5"
+        style={{ background: "#ffffff", borderBottom: "1px solid #e6e6e6" }}
       >
-        <h1 className="text-[18px] font-medium" style={{ color: "#0F0F0F" }}>あなたの記録</h1>
+        <h1 className="text-[18px]" style={{ fontWeight: 700, color: "#262626" }}>記録</h1>
       </header>
 
-      {/* level card (dark = YouTube dark mode flavor) */}
-      <div className="mx-4 mt-4 rounded-yt-card p-4" style={{ background: "#0F0F0F", color: "#FFFFFF" }}>
-        <div className="flex items-start justify-between">
+      {/* ── BMW dark hero band: level info ── */}
+      <div className="px-6 py-8" style={{ background: "#1a2129" }}>
+        <p
+          className="mb-1 text-[11px]"
+          style={{ fontWeight: 700, letterSpacing: "1.5px", textTransform: "uppercase", color: "#6b6b6b" }}
+        >
+          現在のレベル
+        </p>
+        <div className="flex items-end justify-between">
           <div>
-            <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.55)" }}>現在のレベル</p>
-            <p className="mt-0.5 text-[20px] font-medium">{level.title}</p>
-            <p className="text-[24px] font-bold leading-tight">Lv.{level.level}</p>
+            <p className="text-[40px] leading-none" style={{ fontWeight: 700, color: "#ffffff" }}>
+              {level.title}
+            </p>
+            <p className="mt-1 text-[20px]" style={{ fontWeight: 700, color: "#1c69d4" }}>
+              LV. {level.level}
+            </p>
           </div>
           <div className="text-right">
-            <p className="text-[28px] font-bold" style={{ color: "#FF0000" }}>{xp}</p>
-            <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.55)" }}>
-              XP（経験値）
+            <p className="text-[36px] leading-none" style={{ fontWeight: 700, color: "#ffffff" }}>
+              {xp}
             </p>
-            <p className="mt-0.5 text-[11px]" style={{ color: "rgba(255,255,255,0.40)" }}>
-              習慣を達成するたびに増えます
+            <p
+              className="text-[11px]"
+              style={{ fontWeight: 700, letterSpacing: "1.5px", textTransform: "uppercase", color: "#6b6b6b" }}
+            >
+              TOTAL XP
             </p>
           </div>
         </div>
-        <div className="mt-3 h-1.5 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.15)" }}>
-          <div className="h-full rounded-full transition-all duration-500"
-            style={{ width: `${Math.round(level.progress * 100)}%`, background: "#FF0000" }} />
+
+        {/* XP bar */}
+        <div className="mt-5">
+          <div className="h-[2px]" style={{ background: "rgba(255,255,255,0.12)" }}>
+            <div
+              className="h-full transition-all duration-500"
+              style={{ width: `${Math.round(level.progress * 100)}%`, background: "#1c69d4" }}
+            />
+          </div>
+          <p className="mt-1.5 text-[12px]" style={{ fontWeight: 300, color: "#6b6b6b" }}>
+            次のレベル「{nextLevel.title}」まで {Math.max(0, level.ceil - xp)} XP
+          </p>
         </div>
-        <p className="mt-1 text-[11px]" style={{ color: "rgba(255,255,255,0.40)" }}>
-          次のレベル「{getLevelInfo(level.ceil).title}」まで {Math.max(0, level.ceil - xp)} XP
-        </p>
       </div>
 
-      {/* stats row */}
-      <div className="mx-4 mt-4 grid grid-cols-3 gap-3">
-        <StatBox
-          icon={<Flame size={20} style={{ color: "#FF0000" }} />}
-          value={summary.bestStreak} unit="日"
-          label="最高連続" desc="途切れずに達成した最長記録"
-        />
-        <StatBox
-          icon={<TrendingUp size={20} style={{ color: "#FF0000" }} />}
-          value={summary.rate} unit="%"
-          label="30日達成率" desc="直近30日の予定日中の達成割合"
-        />
-        <StatBox
-          icon={<Trophy size={20} style={{ color: "#FF0000" }} />}
-          value={summary.totalDone} unit="回"
-          label="のべ達成" desc="アプリ開始からの合計達成回数"
-        />
+      {/* ── spec cells (BMW spec-cell style) ── */}
+      <div
+        className="grid grid-cols-3"
+        style={{ borderBottom: "1px solid #e6e6e6", background: "#ffffff" }}
+      >
+        <SpecCell icon={<Flame size={16} style={{ color: "#1c69d4" }} />} value={summary.bestStreak} unit="日" label="最高連続" desc="途切れずに達成した最長記録" />
+        <SpecCell icon={<TrendingUp size={16} style={{ color: "#1c69d4" }} />} value={summary.rate} unit="%" label="30日達成率" desc="予定日に対する達成割合" border />
+        <SpecCell icon={<Trophy size={16} style={{ color: "#1c69d4" }} />} value={summary.totalDone} unit="回" label="のべ達成" desc="開始からの累計達成数" />
       </div>
 
-      {/* section */}
-      <div className="mt-6 px-4 pb-2" style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
-        <p className="text-[14px] font-medium" style={{ color: "#0F0F0F" }}>
-          習慣ごとのカレンダー
-          <span className="ml-1 text-[12px] font-normal" style={{ color: "#606060" }}>
-            · 直近13週
-          </span>
-        </p>
-        <p className="mt-0.5 text-[12px]" style={{ color: "#606060" }}>
-          色が濃いほど達成した日。灰色はフリーズ（まあいっか）使用日。
-        </p>
+      {/* section label */}
+      <div
+        className="flex items-center justify-between px-5 py-3"
+        style={{ borderBottom: "1px solid #e6e6e6", background: "#f7f7f7" }}
+      >
+        <span
+          className="text-[11px]"
+          style={{ fontWeight: 700, letterSpacing: "1.5px", textTransform: "uppercase", color: "#6b6b6b" }}
+        >
+          習慣カレンダー
+        </span>
+        <span className="text-[11px]" style={{ fontWeight: 300, color: "#9a9a9a" }}>直近13週</span>
       </div>
 
+      {/* heatmaps */}
       {active.length === 0 ? (
-        <div className="px-4 py-12 text-center">
-          <p className="text-[15px] font-medium" style={{ color: "#0F0F0F" }}>まだ習慣がありません</p>
-          <p className="mt-1 text-[13px]" style={{ color: "#606060" }}>「ホーム」タブから追加してみよう。</p>
+        <div className="px-5 py-16 text-center">
+          <p className="text-[16px]" style={{ fontWeight: 700, color: "#262626" }}>まだ習慣がありません</p>
+          <p className="mt-1 text-[14px]" style={{ fontWeight: 300, color: "#6b6b6b" }}>
+            ホームタブから追加してください。
+          </p>
         </div>
       ) : (
-        <div className="px-4 pt-3 space-y-4">
+        <div>
           {active.map((h) => <HabitHeatmap key={h.id} habitId={h.id} />)}
         </div>
       )}
@@ -118,17 +131,29 @@ export default function StatsView() {
   )
 }
 
-function StatBox({ icon, value, unit, label, desc }: {
-  icon: React.ReactNode; value: number; unit: string; label: string; desc: string
+function SpecCell({ icon, value, unit, label, desc, border }: {
+  icon: React.ReactNode; value: number; unit: string; label: string; desc: string; border?: boolean
 }) {
   return (
-    <div className="rounded-yt-card p-3 text-center" style={{ background: "#F2F2F2" }}>
-      <div className="mb-1 flex justify-center">{icon}</div>
-      <p className="text-[20px] font-bold leading-tight" style={{ color: "#0F0F0F" }}>
-        {value}<span className="text-[12px] font-normal" style={{ color: "#606060" }}>{unit}</span>
+    <div
+      className="px-4 py-5"
+      style={{
+        borderRight: border ? "1px solid #e6e6e6" : undefined,
+        borderLeft:  border ? "1px solid #e6e6e6" : undefined,
+      }}
+    >
+      <div className="mb-2">{icon}</div>
+      <div className="flex items-baseline gap-0.5">
+        <span className="text-[28px] leading-none" style={{ fontWeight: 700, color: "#262626" }}>{value}</span>
+        <span className="text-[12px]" style={{ fontWeight: 300, color: "#6b6b6b" }}>{unit}</span>
+      </div>
+      <p
+        className="mt-1 text-[10px]"
+        style={{ fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "#9a9a9a" }}
+      >
+        {label}
       </p>
-      <p className="mt-0.5 text-[11px] font-medium" style={{ color: "#0F0F0F" }}>{label}</p>
-      <p className="mt-0.5 text-[10px] leading-tight" style={{ color: "#606060" }}>{desc}</p>
+      <p className="mt-0.5 text-[11px]" style={{ fontWeight: 300, color: "#9a9a9a" }}>{desc}</p>
     </div>
   )
 }
@@ -145,16 +170,20 @@ function HabitHeatmap({ habitId }: { habitId: string }) {
   )
 
   return (
-    <div className="rounded-yt-card p-3" style={{ border: "1px solid rgba(0,0,0,0.10)" }}>
-      <div className="mb-2 flex items-center gap-2">
-        <span className="flex h-8 w-8 items-center justify-center rounded-full text-[16px]" style={{ background: col.thumb }}>
-          {habit.emoji}
-        </span>
-        <span className="flex-1 truncate text-[14px] font-medium" style={{ color: "#0F0F0F" }}>
+    <div
+      className="px-5 py-4"
+      style={{ borderBottom: "1px solid #e6e6e6" }}
+    >
+      <div className="flex items-center gap-3 mb-3">
+        <span className="text-[20px]">{habit.emoji}</span>
+        <span className="flex-1 truncate text-[15px]" style={{ fontWeight: 700, color: "#262626" }}>
           {habit.title}
         </span>
         {streak > 0 && (
-          <span className="flex items-center gap-0.5 rounded-yt-pill px-2 py-0.5 text-[11px] font-medium text-white" style={{ background: "#FF0000" }}>
+          <span
+            className="flex items-center gap-1 px-2 py-0.5 text-[11px] text-white"
+            style={{ background: "#1a2129", fontWeight: 700, letterSpacing: "0.5px" }}
+          >
             <Flame size={10} /> {streak}日
           </span>
         )}
@@ -174,7 +203,7 @@ function HabitHeatmap({ habitId }: { habitId: string }) {
               else { bg = "rgba(0,0,0,0.08)"; if (d > today) opacity = 0 }
               return (
                 <div key={d} title={d}
-                  className="h-[11px] w-[11px] rounded-[2px]"
+                  className="h-[11px] w-[11px]"
                   style={{ background: bg, opacity }}
                 />
               )
@@ -183,17 +212,16 @@ function HabitHeatmap({ habitId }: { habitId: string }) {
         ))}
       </div>
 
-      <div className="mt-2 flex items-center gap-3 text-[11px]" style={{ color: "#606060" }}>
+      <div className="mt-2 flex items-center gap-4 text-[10px]" style={{ color: "#9a9a9a", fontWeight: 700, letterSpacing: "0.5px", textTransform: "uppercase" }}>
         <span className="flex items-center gap-1">
-          <span className="inline-block h-2.5 w-2.5 rounded-[2px]" style={{ background: col.accent }} /> 達成
+          <span className="inline-block h-2.5 w-2.5" style={{ background: col.accent }} /> 達成
         </span>
         <span className="flex items-center gap-1">
-          <span className="inline-block h-2.5 w-2.5 rounded-[2px]" style={{ background: col.freeze }} /> まあいっか
+          <span className="inline-block h-2.5 w-2.5" style={{ background: col.freeze }} /> スキップ
         </span>
         <span className="flex items-center gap-1">
-          <span className="inline-block h-2.5 w-2.5 rounded-[2px] bg-black/10" /> 未達成
+          <span className="inline-block h-2.5 w-2.5 bg-black/8" style={{ background: "rgba(0,0,0,0.08)" }} /> 未達成
         </span>
-        <Info size={11} className="ml-auto" />
       </div>
     </div>
   )

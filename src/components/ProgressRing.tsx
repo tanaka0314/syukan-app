@@ -1,5 +1,5 @@
 interface Props {
-  progress: number  // 0..1
+  progress: number
   size?: number
   stroke?: number
   color?: string
@@ -9,8 +9,8 @@ interface Props {
 export default function ProgressRing({
   progress,
   size = 96,
-  stroke = 8,
-  color = "#FF0000",
+  stroke = 6,
+  color = "#1c69d4",
   children,
 }: Props) {
   const r = (size - stroke) / 2
@@ -19,10 +19,10 @@ export default function ProgressRing({
   return (
     <div className="relative inline-flex items-center justify-center">
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(0,0,0,0.08)" strokeWidth={stroke} />
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth={stroke} />
         <circle
-          cx={size / 2} cy={size / 2} r={r}
-          fill="none" stroke={color} strokeWidth={stroke} strokeLinecap="round"
+          cx={size/2} cy={size/2} r={r}
+          fill="none" stroke={color} strokeWidth={stroke} strokeLinecap="square"
           strokeDasharray={c} strokeDashoffset={offset}
           style={{ transition: "stroke-dashoffset 0.6s ease" }}
         />

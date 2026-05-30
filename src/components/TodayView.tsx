@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react"
-import { Bell } from "lucide-react"
 import type { Habit } from "../types"
 import { useHabitStore } from "../store/useHabitStore"
 import { todayKey, isScheduledOn, weekdayLabel, weekdayOf } from "../lib/date"
@@ -17,22 +16,20 @@ interface Props {
 
 function greeting(): string {
   const h = new Date().getHours()
-  if (h < 5)  return "おつかれさま"
+  if (h < 5)  return "お疲れ様です"
   if (h < 11) return "おはようございます"
   if (h < 17) return "こんにちは"
   return "こんばんは"
 }
 
 export default function TodayView({ onAdd, onEdit }: Props) {
-  const habits        = useHabitStore((s) => s.habits)
-  const logs          = useHabitStore((s) => s.logs)
-  const xp            = useHabitStore((s) => s.xp)
-  const reorderHabit  = useHabitStore((s) => s.reorderHabit)
+  const habits       = useHabitStore((s) => s.habits)
+  const logs         = useHabitStore((s) => s.logs)
+  const xp           = useHabitStore((s) => s.xp)
+  const reorderHabit = useHabitStore((s) => s.reorderHabit)
   const [toast, setToast] = useState<string | null>(null)
 
   const today  = todayKey()
-
-  // 今日の習慣を order 順で並べる
   const todays = useMemo(
     () =>
       habits
@@ -63,62 +60,73 @@ export default function TodayView({ onAdd, onEdit }: Props) {
     const all = newDone >= todays.length && todays.length > 0
     if (all) {
       celebrateAll()
-      showToast("🎉 " + allDoneMessage())
+      showToast(allDoneMessage())
     } else {
       celebrateOne(x, y)
       const streak = habit
         ? calcStreak(new Set([...doneSetFor(logs, habitId), today]), habit.days)
         : 0
       const sm = streakMessage(streak)
-      showToast(sm ? "🔥 " + sm : praiseMessage())
+      showToast(sm ?? praiseMessage())
     }
   }
 
   return (
-    <div className="mx-auto max-w-md pb-24" style={{ background: "#FFFFFF" }}>
+    <div className="mx-auto max-w-md pb-24 bg-bmw-canvas">
 
-      {/* ── header ── */}
+      {/* ── BMW: white sticky top nav (64px) ── */}
       <header
-        className="sticky top-0 z-20 flex items-center justify-between px-4 py-3"
-        style={{ background: "#FFFFFF", borderBottom: "1px solid rgba(0,0,0,0.10)" }}
+        className="sticky top-0 z-20 flex h-16 items-center justify-between px-5"
+        style={{ background: "#ffffff", borderBottom: "1px solid #e6e6e6" }}
       >
         <div className="flex items-baseline gap-2">
-          <span className="text-[20px] font-bold leading-none" style={{ color: "#FF0000" }}>つ</span>
-          <span className="text-[20px] font-bold leading-none" style={{ color: "#0F0F0F" }}>づくん</span>
+          {/* BMW-style wordmark — no pill, no decoration */}
+          <span className="text-[22px]" style={{ fontWeight: 700, color: "#1c69d4" }}>つ</span>
+          <span className="text-[22px]" style={{ fontWeight: 700, color: "#262626" }}>づくん</span>
         </div>
-        <Bell size={18} style={{ color: "#606060" }} />
+        <span
+          className="text-[11px]"
+          style={{ fontWeight: 700, letterSpacing: "1.5px", textTransform: "uppercase", color: "#9a9a9a" }}
+        >
+          {now.getMonth() + 1}月{now.getDate()}日 {weekdayLabel(wd)}
+        </span>
       </header>
 
-      {/* ── progress summary ── */}
-      <div className="px-4 py-4" style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
-        <div className="flex items-center gap-4">
-          <ProgressRing progress={progress} size={88} stroke={8} color="#FF0000">
-            <span className="text-[18px] font-bold leading-none" style={{ color: "#0F0F0F" }}>
+      {/* ── BMW: dark navy hero band (surface-dark #1a2129) ── */}
+      <div className="px-5 py-7" style={{ background: "#1a2129" }}>
+        <div className="flex items-center gap-6">
+          {/* Progress ring — BMW Blue on dark */}
+          <ProgressRing progress={progress} size={88} stroke={5} color="#1c69d4">
+            <span className="text-[20px] leading-none" style={{ fontWeight: 700, color: "#ffffff" }}>
               {doneCount}
             </span>
-            <span className="text-[11px]" style={{ color: "#606060" }}>/{todays.length}</span>
+            <span className="text-[11px]" style={{ color: "#bbbbbb" }}>/{todays.length}</span>
           </ProgressRing>
 
           <div className="flex-1">
-            <p className="text-[14px] font-medium" style={{ color: "#0F0F0F" }}>
-              {greeting()}、{now.getMonth() + 1}月{now.getDate()}日({weekdayLabel(wd)})
+            <p className="text-[13px]" style={{ fontWeight: 300, color: "#bbbbbb" }}>
+              {greeting()}
             </p>
-            <p className="mt-0.5 text-[13px]" style={{ color: "#606060" }}>
+            <p className="mt-0.5 text-[16px]" style={{ fontWeight: 700, color: "#ffffff" }}>
               {allClear
-                ? "今日の習慣、ぜんぶ完了！🎉 お疲れさまでした"
+                ? "本日の習慣、完了。"
                 : todays.length === 0
-                ? "今日やる習慣はありません。のんびりどうぞ 🛋️"
-                : `あと ${todays.length - doneCount} 個。ひとつずつで大丈夫。`}
+                ? "本日の習慣はありません。"
+                : `あと ${todays.length - doneCount} 項目`}
             </p>
-            <div className="mt-2">
-              <div className="flex items-center justify-between text-[11px]" style={{ color: "#606060" }}>
-                <span>Lv.{level.level} {level.title}</span>
-                <span>{xp} XP</span>
+
+            {/* XP bar */}
+            <div className="mt-3">
+              <div className="flex justify-between text-[11px] mb-1">
+                <span style={{ fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "#bbbbbb" }}>
+                  LV.{level.level} {level.title}
+                </span>
+                <span style={{ fontWeight: 300, color: "#6b6b6b" }}>{xp} XP</span>
               </div>
-              <div className="mt-1 h-1 overflow-hidden rounded-full bg-yt-surface">
+              <div className="h-[2px]" style={{ background: "rgba(255,255,255,0.12)" }}>
                 <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{ width: `${Math.round(level.progress * 100)}%`, background: "#FF0000" }}
+                  className="h-full transition-all duration-500"
+                  style={{ width: `${Math.round(level.progress * 100)}%`, background: "#1c69d4" }}
                 />
               </div>
             </div>
@@ -128,15 +136,23 @@ export default function TodayView({ onAdd, onEdit }: Props) {
 
       {/* ── section label ── */}
       {todays.length > 0 && (
-        <div className="px-4 py-2">
-          <p className="text-[13px] font-medium" style={{ color: "#0F0F0F" }}>
+        <div
+          className="flex items-center justify-between px-5 py-3"
+          style={{ borderBottom: "1px solid #e6e6e6", background: "#f7f7f7" }}
+        >
+          <span
+            className="text-[11px]"
+            style={{ fontWeight: 700, letterSpacing: "1.5px", textTransform: "uppercase", color: "#6b6b6b" }}
+          >
             今日の習慣
-            <span className="ml-1 font-normal" style={{ color: "#606060" }}>· {todays.length}件</span>
-          </p>
+          </span>
+          <span className="text-[11px]" style={{ fontWeight: 300, color: "#9a9a9a" }}>
+            {doneCount} / {todays.length} 完了
+          </span>
         </div>
       )}
 
-      {/* ── habit feed ── */}
+      {/* ── habit list ── */}
       {todays.length === 0 ? (
         <EmptyToday hasAny={habits.some((h) => !h.archived)} onAdd={onAdd} />
       ) : (
@@ -147,7 +163,7 @@ export default function TodayView({ onAdd, onEdit }: Props) {
               habit={h}
               onDone={handleDone}
               onEdit={onEdit}
-              onFreeze={() => showToast("❄️ " + comfortMessage())}
+              onFreeze={() => showToast(comfortMessage())}
               onMoveUp={() => reorderHabit(h.id, "up")}
               onMoveDown={() => reorderHabit(h.id, "down")}
               isFirst={idx === 0}
@@ -159,10 +175,10 @@ export default function TodayView({ onAdd, onEdit }: Props) {
 
       {/* ── toast ── */}
       {toast && (
-        <div className="pointer-events-none fixed left-1/2 top-16 z-50 -translate-x-1/2 animate-slide-up">
+        <div className="pointer-events-none fixed left-1/2 top-20 z-50 -translate-x-1/2 animate-slide-up">
           <div
-            className="max-w-[88vw] rounded-yt px-4 py-2.5 text-center text-[13px] font-medium text-white shadow-md"
-            style={{ background: "rgba(15,15,15,0.90)" }}
+            className="max-w-[88vw] px-5 py-3 text-center text-[13px] text-white"
+            style={{ background: "#1a2129", fontWeight: 300 }}
           >
             {toast}
           </div>
@@ -174,23 +190,26 @@ export default function TodayView({ onAdd, onEdit }: Props) {
 
 function EmptyToday({ hasAny, onAdd }: { hasAny: boolean; onAdd: () => void }) {
   return (
-    <div className="px-4 py-16 text-center">
-      <div className="mb-4 text-[56px]">{hasAny ? "🛋️" : "🌱"}</div>
-      <p className="text-[16px] font-medium" style={{ color: "#0F0F0F" }}>
-        {hasAny ? "今日はお休みの日" : "最初の習慣を追加しよう"}
-      </p>
-      <p className="mt-2 text-[13px]" style={{ color: "#606060" }}>
-        {hasAny ? "ゆっくり休んでね。また明日。" : "「バカみたいに小さく」始めるのが、続けるコツです。"}
-      </p>
-      {!hasAny && (
-        <button
-          onClick={onAdd}
-          className="mt-5 rounded-yt-pill px-5 py-2.5 text-[14px] font-medium text-white transition active:scale-95"
-          style={{ background: "#FF0000" }}
-        >
-          ＋ 習慣を追加する
-        </button>
-      )}
+    <div>
+      {/* dark band */}
+      <div className="px-5 py-12 text-center" style={{ background: "#1a2129" }}>
+        <div className="mb-4 text-[56px]">{hasAny ? "🛋️" : "🌱"}</div>
+        <p className="text-[20px]" style={{ fontWeight: 700, color: "#ffffff" }}>
+          {hasAny ? "本日はお休み" : "最初の習慣を登録する"}
+        </p>
+        <p className="mt-2 text-[14px]" style={{ fontWeight: 300, color: "#bbbbbb" }}>
+          {hasAny ? "ゆっくり休んでください。" : "小さく始めることが、続く習慣の第一歩です。"}
+        </p>
+        {!hasAny && (
+          <button
+            onClick={onAdd}
+            className="mt-6 px-8 py-3 text-[14px] text-white transition active:opacity-80"
+            style={{ background: "#1c69d4", fontWeight: 700, letterSpacing: "0.5px" }}
+          >
+            習慣を追加する
+          </button>
+        )}
+      </div>
     </div>
   )
 }

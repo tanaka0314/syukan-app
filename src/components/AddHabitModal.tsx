@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { X, Trash2, Wand2 } from "lucide-react"
+import { X, Trash2 } from "lucide-react"
 import type { Habit, Weekday, HabitColor } from "../types"
 import { useHabitStore, type NewHabitInput } from "../store/useHabitStore"
 import {
@@ -7,15 +7,11 @@ import {
 } from "../lib/tinyHabit"
 import { weekdayLabel } from "../lib/date"
 
-interface Props {
-  open: boolean
-  editing: Habit | null
-  onClose: () => void
-}
+interface Props { open: boolean; editing: Habit | null; onClose: () => void }
 
 const ALL_DAYS: Weekday[] = [0, 1, 2, 3, 4, 5, 6]
 const WEEKDAYS: Weekday[]  = [1, 2, 3, 4, 5]
-const EMPTY: NewHabitInput = { title: "", tinyStep: "", cue: "", emoji: "⭐", color: "brand", days: [...ALL_DAYS] }
+const EMPTY: NewHabitInput = { title: "", tinyStep: "", cue: "", emoji: "⭐", color: "blue", days: [...ALL_DAYS] }
 
 export default function AddHabitModal({ open, editing, onClose }: Props) {
   const addHabit    = useHabitStore((s) => s.addHabit)
@@ -51,45 +47,58 @@ export default function AddHabitModal({ open, editing, onClose }: Props) {
     onClose()
   }
 
+  // BMW input style
+  const inputStyle = {
+    border: "none",
+    borderBottom: "1px solid #e6e6e6",
+    background: "transparent",
+    color: "#262626",
+    fontWeight: 300,
+    fontSize: "16px",
+    outline: "none",
+    width: "100%",
+    padding: "10px 0",
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-end">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
       <div
         className="relative z-10 flex max-h-[94vh] w-full flex-col animate-slide-up"
-        style={{ background: "#FFFFFF", borderRadius: "16px 16px 0 0", maxWidth: 480, margin: "0 auto" }}
+        style={{ background: "#ffffff", maxWidth: 480, margin: "0 auto" }}
       >
-        {/* drag handle */}
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="h-1 w-10 rounded-full bg-yt-surface2" />
-        </div>
-
-        {/* header */}
-        <div className="flex items-center justify-between px-4 pb-3">
-          <h2 className="text-[17px] font-medium" style={{ color: "#0F0F0F" }}>
-            {editing ? "習慣を編集" : "新しい習慣を追加"}
+        {/* BMW-style header with bottom border */}
+        <div
+          className="flex items-center justify-between px-6 py-4"
+          style={{ borderBottom: "1px solid #e6e6e6" }}
+        >
+          <h2 className="text-[18px]" style={{ fontWeight: 700, color: "#262626" }}>
+            {editing ? "習慣を編集" : "新しい習慣"}
           </h2>
-          <button
-            onClick={onClose}
-            className="rounded-full p-1.5 transition active:bg-yt-surface"
-            aria-label="閉じる"
-          >
-            <X size={20} style={{ color: "#606060" }} />
+          <button onClick={onClose} className="p-1 transition active:opacity-60" aria-label="閉じる">
+            <X size={20} style={{ color: "#6b6b6b" }} />
           </button>
         </div>
 
-        <div className="flex-1 space-y-5 overflow-y-auto px-4 pb-4">
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
 
           {/* テンプレ */}
           {!editing && (
             <div>
-              <Label icon={<Wand2 size={13} />}>テンプレから選ぶ（かんたん）</Label>
-              <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+              <SectionLabel>テンプレから選ぶ</SectionLabel>
+              <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
                 {TEMPLATES.map((t) => (
                   <button
                     key={t.title}
                     onClick={() => setForm((f) => ({ ...f, title: t.title, tinyStep: t.tinyStep, cue: t.cue, emoji: t.emoji }))}
-                    className="flex shrink-0 items-center gap-1.5 rounded-yt-pill px-3 py-1.5 text-[13px] font-medium transition active:scale-95"
-                    style={{ background: "#F2F2F2", color: "#0F0F0F" }}
+                    className="shrink-0 px-3 py-2 text-[13px] transition active:bg-bmw-soft"
+                    style={{
+                      border: "1px solid #e6e6e6",
+                      fontWeight: 700,
+                      letterSpacing: "0.3px",
+                      color: "#262626",
+                      background: "#ffffff",
+                    }}
                   >
                     {t.emoji} {t.title}
                   </button>
@@ -100,12 +109,12 @@ export default function AddHabitModal({ open, editing, onClose }: Props) {
 
           {/* タイトル */}
           <div>
-            <Label>習慣の名前</Label>
-            <div className="flex gap-2">
+            <SectionLabel>習慣の名前</SectionLabel>
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => setShowEmoji((v) => !v)}
-                className="h-11 w-11 shrink-0 rounded-yt text-[22px] transition active:scale-90"
-                style={{ background: "#F2F2F2", border: "1px solid rgba(0,0,0,0.10)" }}
+                className="text-[24px] transition active:scale-90"
+                aria-label="絵文字"
               >
                 {form.emoji}
               </button>
@@ -113,15 +122,14 @@ export default function AddHabitModal({ open, editing, onClose }: Props) {
                 value={form.title}
                 onChange={(e) => set("title", e.target.value)}
                 placeholder="例: 運動する"
-                className="h-11 flex-1 rounded-yt px-3 text-[15px] outline-none"
-                style={{ background: "#F2F2F2", border: "1px solid rgba(0,0,0,0.10)", color: "#0F0F0F" }}
+                style={inputStyle}
               />
             </div>
             {showEmoji && (
-              <div className="mt-2 grid grid-cols-8 gap-1 rounded-yt p-2" style={{ background: "#F2F2F2" }}>
+              <div className="mt-2 grid grid-cols-8 gap-1 p-3" style={{ background: "#f7f7f7" }}>
                 {EMOJI_CHOICES.map((e) => (
                   <button key={e} onClick={() => { set("emoji", e); setShowEmoji(false) }}
-                    className="rounded p-1.5 text-[20px] hover:bg-yt-surface2 active:scale-90 transition">
+                    className="p-1.5 text-[20px] hover:bg-bmw-strong transition active:scale-90">
                     {e}
                   </button>
                 ))}
@@ -131,49 +139,52 @@ export default function AddHabitModal({ open, editing, onClose }: Props) {
 
           {/* 極小ステップ */}
           <div>
-            <Label>👣 極小ステップ</Label>
+            <SectionLabel>極小ステップ（これだけやればOK）</SectionLabel>
             <input
               value={form.tinyStep}
               onChange={(e) => set("tinyStep", e.target.value)}
               placeholder="例: 運動着に着替えるだけ"
-              className="h-11 w-full rounded-yt px-3 text-[15px] outline-none"
-              style={{ background: "#F2F2F2", border: "1px solid rgba(0,0,0,0.10)", color: "#0F0F0F" }}
+              style={inputStyle}
             />
-            <p className="mt-1 text-[12px]" style={{ color: "#606060" }}>
-              ハードルは低いほど続きます。「バカみたい」でちょうどいい。
+            <p className="mt-1.5 text-[12px]" style={{ fontWeight: 300, color: "#9a9a9a" }}>
+              ハードルは低いほど続きます。
             </p>
           </div>
 
           {/* if-then */}
           <div>
-            <Label>🪝 きっかけ（いつやる？）</Label>
+            <SectionLabel>きっかけ（if-then）</SectionLabel>
             <input
               value={form.cue}
               onChange={(e) => set("cue", e.target.value)}
               placeholder="例: 朝起きて顔を洗ったら"
-              className="h-11 w-full rounded-yt px-3 text-[15px] outline-none"
-              style={{ background: "#F2F2F2", border: "1px solid rgba(0,0,0,0.10)", color: "#0F0F0F" }}
+              style={inputStyle}
             />
-            <div className="mt-2 flex gap-1.5 overflow-x-auto">
+            <div className="mt-2 flex gap-2 overflow-x-auto">
               {CUE_SUGGESTIONS.map((c) => (
                 <button key={c} onClick={() => set("cue", c)}
-                  className="shrink-0 rounded-yt-pill px-2.5 py-1 text-[12px] transition active:scale-95"
-                  style={{ background: "#F2F2F2", color: "#606060" }}>
+                  className="shrink-0 px-2.5 py-1 text-[12px] transition active:scale-95"
+                  style={{ border: "1px solid #e6e6e6", fontWeight: 300, color: "#6b6b6b" }}>
                   {c}
                 </button>
               ))}
             </div>
             {form.cue && form.title && (
-              <p className="mt-2 rounded-yt px-3 py-2 text-[13px]" style={{ background: "#FFF3F3", color: "#CC0000" }}>
-                「{form.cue}、{form.tinyStep || form.title}」
-              </p>
+              <div
+                className="mt-3 px-4 py-3"
+                style={{ borderLeft: "3px solid #1c69d4", background: "#f7f7f7" }}
+              >
+                <p className="text-[13px]" style={{ fontWeight: 300, color: "#3c3c3c" }}>
+                  「{form.cue}、{form.tinyStep || form.title}」
+                </p>
+              </div>
             )}
           </div>
 
           {/* 曜日 */}
           <div>
-            <Label>やる曜日</Label>
-            <div className="mb-2 flex gap-2">
+            <SectionLabel>実施する曜日</SectionLabel>
+            <div className="flex gap-2 mb-3">
               {[
                 { label: "毎日", days: ALL_DAYS, check: (d: Weekday[]) => d.length === 7 },
                 { label: "平日", days: WEEKDAYS,  check: (d: Weekday[]) => d.length === 5 && WEEKDAYS.every((x) => d.includes(x)) },
@@ -182,8 +193,14 @@ export default function AddHabitModal({ open, editing, onClose }: Props) {
                 const active = check(form.days)
                 return (
                   <button key={label} onClick={() => set("days", [...days])}
-                    className="rounded-yt-pill px-3 py-1.5 text-[13px] font-medium transition active:scale-95"
-                    style={{ background: active ? "#0F0F0F" : "#F2F2F2", color: active ? "#fff" : "#0F0F0F" }}>
+                    className="px-3 py-1.5 text-[12px] transition active:opacity-70"
+                    style={{
+                      fontWeight: 700,
+                      letterSpacing: "0.5px",
+                      background: active ? "#262626" : "#ffffff",
+                      color: active ? "#ffffff" : "#262626",
+                      border: "1px solid " + (active ? "#262626" : "#e6e6e6"),
+                    }}>
                     {label}
                   </button>
                 )
@@ -194,8 +211,13 @@ export default function AddHabitModal({ open, editing, onClose }: Props) {
                 const on = form.days.includes(d)
                 return (
                   <button key={d} onClick={() => toggleDay(d)}
-                    className="h-9 flex-1 rounded-yt text-[13px] font-medium transition active:scale-95"
-                    style={{ background: on ? "#FF0000" : "#F2F2F2", color: on ? "#fff" : "#606060" }}>
+                    className="h-9 flex-1 text-[12px] transition active:scale-95"
+                    style={{
+                      fontWeight: 700,
+                      background: on ? "#1c69d4" : "#ffffff",
+                      color: on ? "#ffffff" : "#6b6b6b",
+                      border: "1px solid " + (on ? "#1c69d4" : "#e6e6e6"),
+                    }}>
                     {weekdayLabel(d)}
                   </button>
                 )
@@ -203,16 +225,20 @@ export default function AddHabitModal({ open, editing, onClose }: Props) {
             </div>
           </div>
 
-          {/* 色 */}
+          {/* カラー */}
           <div>
-            <Label>カラー</Label>
+            <SectionLabel>カラー</SectionLabel>
             <div className="flex gap-3">
               {COLOR_CHOICES.map((c) => {
-                const selected = form.color === c.key
+                const sel = form.color === c.key
                 return (
                   <button key={c.key} onClick={() => set("color", c.key as HabitColor)} aria-label={c.label}
-                    className="h-8 w-8 rounded-full transition active:scale-90"
-                    style={{ background: c.swatch, outline: selected ? `2px solid #FF0000` : "none", outlineOffset: "2px" }}
+                    className="h-8 w-8 transition active:scale-90"
+                    style={{
+                      background: c.swatch,
+                      outline: sel ? `2px solid #262626` : "none",
+                      outlineOffset: "2px",
+                    }}
                   />
                 )
               })}
@@ -220,21 +246,25 @@ export default function AddHabitModal({ open, editing, onClose }: Props) {
           </div>
 
           {editing && (
-            <button onClick={() => {
-              if (editing && confirm("削除しますか？記録も消えます。")) { deleteHabit(editing.id); onClose() }
-            }}
-              className="flex items-center gap-1.5 text-[13px]" style={{ color: "#FF0000" }}>
-              <Trash2 size={14} /> この習慣を削除する
+            <button
+              onClick={() => { if (editing && confirm("削除しますか？")) { deleteHabit(editing.id); onClose() } }}
+              className="flex items-center gap-1.5 text-[12px] transition active:opacity-70"
+              style={{ fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "#dc2626" }}
+            >
+              <Trash2 size={13} /> 削除
             </button>
           )}
         </div>
 
-        {/* save */}
-        <div className="px-4 py-3 safe-bottom" style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}>
-          <button onClick={save} disabled={!form.title.trim()}
-            className="h-11 w-full rounded-yt text-[15px] font-medium text-white transition active:scale-95 disabled:opacity-40"
-            style={{ background: "#FF0000" }}>
-            {editing ? "保存する" : "この習慣をはじめる"}
+        {/* BMW: rectangular primary save button */}
+        <div className="px-6 py-4" style={{ borderTop: "1px solid #e6e6e6" }}>
+          <button
+            onClick={save}
+            disabled={!form.title.trim()}
+            className="h-12 w-full text-[14px] text-white transition active:opacity-80 disabled:opacity-30"
+            style={{ background: "#1c69d4", fontWeight: 700, letterSpacing: "0.5px" }}
+          >
+            {editing ? "変更を保存する" : "この習慣をはじめる"}
           </button>
         </div>
       </div>
@@ -242,10 +272,13 @@ export default function AddHabitModal({ open, editing, onClose }: Props) {
   )
 }
 
-function Label({ children, icon }: { children: React.ReactNode; icon?: React.ReactNode }) {
+function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="mb-1.5 flex items-center gap-1 text-[13px] font-medium" style={{ color: "#606060" }}>
-      {icon}{children}
+    <p
+      className="mb-2 text-[11px]"
+      style={{ fontWeight: 700, letterSpacing: "1.5px", textTransform: "uppercase", color: "#6b6b6b" }}
+    >
+      {children}
     </p>
   )
 }

@@ -4,26 +4,33 @@ export default {
   theme: {
     extend: {
       colors: {
-        // YouTube design tokens
-        "yt-red":       "#FF0000",
-        "yt-red-hover": "#CC0000",
-        "yt-bg":        "#FFFFFF",
-        "yt-surface":   "#F2F2F2",
-        "yt-surface2":  "#E5E5E5",
-        "yt-text":      "#0F0F0F",
-        "yt-sub":       "#606060",
-        "yt-border":    "rgba(0,0,0,0.10)",
-        "yt-dark-bg":   "#0F0F0F",
-        "yt-dark-surf": "#212121",
-        "yt-dark-card": "#272727",
+        // BMW design tokens
+        "bmw-blue":          "#1c69d4",
+        "bmw-blue-active":   "#0653b6",
+        "bmw-blue-disabled": "#d6d6d6",
+        "bmw-dark":          "#1a2129",
+        "bmw-dark-elevated": "#262e38",
+        "bmw-canvas":        "#ffffff",
+        "bmw-soft":          "#f7f7f7",
+        "bmw-card":          "#fafafa",
+        "bmw-strong":        "#ebebeb",
+        "bmw-ink":           "#262626",
+        "bmw-body":          "#3c3c3c",
+        "bmw-muted":         "#6b6b6b",
+        "bmw-muted-soft":    "#9a9a9a",
+        "bmw-hairline":      "#e6e6e6",
+        "bmw-hairline-strong":"#cccccc",
+        "on-dark":           "#ffffff",
+        "on-dark-soft":      "#bbbbbb",
       },
       fontFamily: {
-        yt: ["Roboto", "system-ui", "-apple-system", "sans-serif"],
+        bmw: ["Inter", "system-ui", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
       },
+      // BMW: 0px radius is the rule. rounded-lg (12px) for modals only. rounded-full for icon buttons.
       borderRadius: {
-        yt: "8px",
-        "yt-pill": "9999px",
-        "yt-card": "12px",
+        "bmw-sm":  "4px",
+        "bmw-md":  "8px",
+        "bmw-lg":  "12px",
       },
       keyframes: {
         "pop-in": {
