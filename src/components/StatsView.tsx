@@ -68,7 +68,7 @@ export default function StatsView() {
             style={{ width: `${Math.round(level.progress * 100)}%`, background: "#FF0000" }} />
         </div>
         <p className="mt-1 text-[11px]" style={{ color: "rgba(255,255,255,0.40)" }}>
-          次のレベル「{/* next title is always level+1 */}{level.title}」まで {Math.max(0, level.ceil - xp)} XP
+          次のレベル「{getLevelInfo(level.ceil).title}」まで {Math.max(0, level.ceil - xp)} XP
         </p>
       </div>
 

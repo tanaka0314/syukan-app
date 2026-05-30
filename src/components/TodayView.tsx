@@ -3,7 +3,7 @@ import { Bell } from "lucide-react"
 import type { Habit } from "../types"
 import { useHabitStore } from "../store/useHabitStore"
 import { todayKey, isScheduledOn, weekdayLabel, weekdayOf } from "../lib/date"
-import { getLevelInfo, praiseMessage, allDoneMessage, streakMessage } from "../lib/level"
+import { getLevelInfo, praiseMessage, allDoneMessage, streakMessage, comfortMessage } from "../lib/level"
 import { celebrateOne, celebrateAll } from "../lib/celebrate"
 import { calcStreak } from "../lib/date"
 import { doneSetFor } from "../store/useHabitStore"
@@ -24,16 +24,23 @@ function greeting(): string {
 }
 
 export default function TodayView({ onAdd, onEdit }: Props) {
-  const habits = useHabitStore((s) => s.habits)
-  const logs   = useHabitStore((s) => s.logs)
-  const xp     = useHabitStore((s) => s.xp)
+  const habits        = useHabitStore((s) => s.habits)
+  const logs          = useHabitStore((s) => s.logs)
+  const xp            = useHabitStore((s) => s.xp)
+  const reorderHabit  = useHabitStore((s) => s.reorderHabit)
   const [toast, setToast] = useState<string | null>(null)
 
   const today  = todayKey()
+
+  // 今日の習慣を order 順で並べる
   const todays = useMemo(
-    () => habits.filter((h) => !h.archived && isScheduledOn(h.days, today)),
+    () =>
+      habits
+        .filter((h) => !h.archived && isScheduledOn(h.days, today))
+        .sort((a, b) => a.order - b.order),
     [habits, today],
   )
+
   const doneCount = todays.filter((h) =>
     logs.some((l) => l.habitId === h.id && l.date === today)
   ).length
@@ -70,31 +77,26 @@ export default function TodayView({ onAdd, onEdit }: Props) {
   return (
     <div className="mx-auto max-w-md pb-24" style={{ background: "#FFFFFF" }}>
 
-      {/* ── YouTube-style header ── */}
+      {/* ── header ── */}
       <header
         className="sticky top-0 z-20 flex items-center justify-between px-4 py-3"
         style={{ background: "#FFFFFF", borderBottom: "1px solid rgba(0,0,0,0.10)" }}
       >
         <div className="flex items-baseline gap-2">
-          {/* YouTube-style wordmark */}
           <span className="text-[20px] font-bold leading-none" style={{ color: "#FF0000" }}>つ</span>
           <span className="text-[20px] font-bold leading-none" style={{ color: "#0F0F0F" }}>づくん</span>
         </div>
-        <div className="flex items-center gap-1 text-[12px]" style={{ color: "#606060" }}>
-          <Bell size={18} />
-        </div>
+        <Bell size={18} style={{ color: "#606060" }} />
       </header>
 
-      {/* ── progress summary card ── */}
+      {/* ── progress summary ── */}
       <div className="px-4 py-4" style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
         <div className="flex items-center gap-4">
           <ProgressRing progress={progress} size={88} stroke={8} color="#FF0000">
             <span className="text-[18px] font-bold leading-none" style={{ color: "#0F0F0F" }}>
               {doneCount}
             </span>
-            <span className="text-[11px]" style={{ color: "#606060" }}>
-              /{todays.length}
-            </span>
+            <span className="text-[11px]" style={{ color: "#606060" }}>/{todays.length}</span>
           </ProgressRing>
 
           <div className="flex-1">
@@ -108,16 +110,10 @@ export default function TodayView({ onAdd, onEdit }: Props) {
                 ? "今日やる習慣はありません。のんびりどうぞ 🛋️"
                 : `あと ${todays.length - doneCount} 個。ひとつずつで大丈夫。`}
             </p>
-
-            {/* level bar */}
             <div className="mt-2">
               <div className="flex items-center justify-between text-[11px]" style={{ color: "#606060" }}>
-                <span>
-                  Lv.{level.level} {level.title}
-                  <span className="ml-1 text-[10px]">
-                    （経験値 {xp} XP · 達成するたびに増えます）
-                  </span>
-                </span>
+                <span>Lv.{level.level} {level.title}</span>
+                <span>{xp} XP</span>
               </div>
               <div className="mt-1 h-1 overflow-hidden rounded-full bg-yt-surface">
                 <div
@@ -125,9 +121,6 @@ export default function TodayView({ onAdd, onEdit }: Props) {
                   style={{ width: `${Math.round(level.progress * 100)}%`, background: "#FF0000" }}
                 />
               </div>
-              <p className="mt-0.5 text-[10px]" style={{ color: "#606060" }}>
-                次のレベルまで {Math.max(0, level.ceil - xp)} XP
-              </p>
             </div>
           </div>
         </div>
@@ -138,9 +131,7 @@ export default function TodayView({ onAdd, onEdit }: Props) {
         <div className="px-4 py-2">
           <p className="text-[13px] font-medium" style={{ color: "#0F0F0F" }}>
             今日の習慣
-            <span className="ml-1 font-normal" style={{ color: "#606060" }}>
-              · {todays.length}件
-            </span>
+            <span className="ml-1 font-normal" style={{ color: "#606060" }}>· {todays.length}件</span>
           </p>
         </div>
       )}
@@ -150,8 +141,18 @@ export default function TodayView({ onAdd, onEdit }: Props) {
         <EmptyToday hasAny={habits.some((h) => !h.archived)} onAdd={onAdd} />
       ) : (
         <div>
-          {todays.map((h) => (
-            <HabitCard key={h.id} habit={h} onDone={handleDone} onEdit={onEdit} />
+          {todays.map((h, idx) => (
+            <HabitCard
+              key={h.id}
+              habit={h}
+              onDone={handleDone}
+              onEdit={onEdit}
+              onFreeze={() => showToast("❄️ " + comfortMessage())}
+              onMoveUp={() => reorderHabit(h.id, "up")}
+              onMoveDown={() => reorderHabit(h.id, "down")}
+              isFirst={idx === 0}
+              isLast={idx === todays.length - 1}
+            />
           ))}
         </div>
       )}
@@ -179,9 +180,7 @@ function EmptyToday({ hasAny, onAdd }: { hasAny: boolean; onAdd: () => void }) {
         {hasAny ? "今日はお休みの日" : "最初の習慣を追加しよう"}
       </p>
       <p className="mt-2 text-[13px]" style={{ color: "#606060" }}>
-        {hasAny
-          ? "ゆっくり休んでね。また明日。"
-          : "「バカみたいに小さく」始めるのが、続けるコツです。"}
+        {hasAny ? "ゆっくり休んでね。また明日。" : "「バカみたいに小さく」始めるのが、続けるコツです。"}
       </p>
       {!hasAny && (
         <button

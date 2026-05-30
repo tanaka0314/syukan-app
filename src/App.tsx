@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import type { Habit } from "./types"
 import { useHabitStore } from "./store/useHabitStore"
 import BottomNav, { type Tab } from "./components/BottomNav"
@@ -9,15 +9,19 @@ import AddHabitModal from "./components/AddHabitModal"
 import Onboarding from "./components/Onboarding"
 
 export default function App() {
-  const onboarded    = useHabitStore((s) => s.onboarded)
-  const setOnboarded = useHabitStore((s) => s.setOnboarded)
+  const onboarded      = useHabitStore((s) => s.onboarded)
+  const setOnboarded   = useHabitStore((s) => s.setOnboarded)
+  const replenishFreeze = useHabitStore((s) => s.replenishFreeze)
 
   const [tab, setTab]         = useState<Tab>("today")
   const [modalOpen, setModal] = useState(false)
   const [editing, setEditing] = useState<Habit | null>(null)
 
-  function openAdd()           { setEditing(null);  setModal(true) }
-  function openEdit(h: Habit)  { setEditing(h);     setModal(true) }
+  // 毎月フリーズトークンを補充（起動時に当月未補充なら実行）
+  useEffect(() => { replenishFreeze() }, [replenishFreeze])
+
+  function openAdd()          { setEditing(null); setModal(true) }
+  function openEdit(h: Habit) { setEditing(h);    setModal(true) }
 
   return (
     <div className="min-h-full safe-top" style={{ background: "#FFFFFF" }}>
